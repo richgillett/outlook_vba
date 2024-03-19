@@ -1,0 +1,57 @@
+' For setting emails to be out of hours
+' All credit to: https://www.datanumen.com/blogs/quickly-delay-sending-specific-emails-working-hours-outlook/#:~:text=Quickly%20Delay%20Sending%20Specific%20Emails%20until%20Working%20Hours,the%20following%20VBA%20code%20into%20this%20project%20window.
+' Paste into Outlook (VBA) into 'ThisSession'
+
+Private Sub Application_ItemSend(ByVal Item As Object, Cancel As Boolean)
+    Dim objMail As MailItem
+    Dim NewSendTime As String
+    Dim bDelayMail As Boolean
+    Dim nPrompt As Integer
+ 
+    bDelayMail = True
+ 
+    If TypeOf Item Is MailItem Then
+       Set objMail = Item
+ 
+       'Work on specific emails only
+       'You can change the conditions as per your needs
+       If objMail.Recipients.Item(1).Address = "boss@datanumen.com" Then
+ 
+          Select Case Weekday(Date, vbMonday)
+                 'Delay 2 days if today is Saturday
+                 Case 6
+                      NewSendTime = (Date + 2) & " 09:00:00"
+                 'Delay 1 days if today is Saturday
+                 Case 7
+                      NewSendTime = (Date + 1) & " 09:00:00"
+                 Case Else
+                      If DatePart("h", Now) < 9 Then
+                         'Delay to 9 o'clock if now is too early
+                         NewSendTime = Date & " 09:00:00"
+                      ElseIf DatePart("h", Now) > 18 Then
+                         Select Case Weekday(Date, vbMonday)
+                                'Delay 3 days if today is Friday and now is over 6 PM
+                                Case 5
+                                     NewSendTime = (Date + 3) & " 09:00:00"
+                                'Delay to 9 o'clock if now is before 6 PM
+                                Case Else
+                                     NewSendTime = (Date + 1) & " 09:00:00"
+                         End Select
+                      Else
+                         bDelayMail = False
+                      End If
+            End Select
+ 
+            If bDelayMail = True And objMail.DeferredDeliveryTime = "1/1/4501" Then
+               'Ask if to delay sending this email
+               nPrompt = MsgBox("Outside Working Hours:" & vbCrLf & "Do you want to delay this email until " & NewSendTime & "?", vbYesNo + vbExclamation, "Delay Email")
+ 
+               If nPrompt = vbYes Then
+                  objMail.DeferredDeliveryTime = NewSendTime
+               Else
+                  objMail.DeferredDeliveryTime = "1/1/4501"
+               End If
+           End If
+       End If
+    End If
+End Sub
