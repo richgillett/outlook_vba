@@ -3,27 +3,28 @@
 ' Paste into Outlook (VBA) into 'ThisSession'
 
 Private Sub Application_ItemSend(ByVal Item As Object, Cancel As Boolean)
+    
     Dim objMail As MailItem
     Dim NewSendTime As String
     Dim bDelayMail As Boolean
     Dim nPrompt As Integer
  
-    bDelayMail = True
+        bDelayMail = True
  
     If TypeOf Item Is MailItem Then
        Set objMail = Item
  
        'Work on specific emails only
        'You can change the conditions as per your needs
-       If objMail.Recipients.Item(1).Address = "boss@datanumen.com" Then
+       'If objMail.Recipients.Item(1).Address = "boss@datanumen.com" Then
  
           Select Case Weekday(Date, vbMonday)
                  'Delay 2 days if today is Saturday
                  Case 6
-                      NewSendTime = (Date + 2) & " 09:00:00"
+                      NewSendTime = (Date + 2) & " 08:00:00"
                  'Delay 1 days if today is Saturday
                  Case 7
-                      NewSendTime = (Date + 1) & " 09:00:00"
+                      NewSendTime = (Date + 1) & " 08:00:00"
                  Case Else
                       If DatePart("h", Now) < 9 Then
                          'Delay to 9 o'clock if now is too early
@@ -32,10 +33,10 @@ Private Sub Application_ItemSend(ByVal Item As Object, Cancel As Boolean)
                          Select Case Weekday(Date, vbMonday)
                                 'Delay 3 days if today is Friday and now is over 6 PM
                                 Case 5
-                                     NewSendTime = (Date + 3) & " 09:00:00"
+                                     NewSendTime = (Date + 3) & " 08:00:00"
                                 'Delay to 9 o'clock if now is before 6 PM
                                 Case Else
-                                     NewSendTime = (Date + 1) & " 09:00:00"
+                                     NewSendTime = (Date + 1) & " 08:00:00"
                          End Select
                       Else
                          bDelayMail = False
@@ -52,6 +53,7 @@ Private Sub Application_ItemSend(ByVal Item As Object, Cancel As Boolean)
                   objMail.DeferredDeliveryTime = "1/1/4501"
                End If
            End If
-       End If
+       'End If '(restricts email)
     End If
 End Sub
+
